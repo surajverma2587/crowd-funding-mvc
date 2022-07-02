@@ -13,7 +13,7 @@ const login = async (req, res) => {
         `[ERROR]: Failed to login | No user with email address of ${email}`
       );
 
-      return res.status(401).json({ error: "Failed to login" });
+      return res.status(500).json({ success: false });
     }
 
     const isAuthorised = await user.checkPassword(password);
@@ -22,15 +22,15 @@ const login = async (req, res) => {
       req.session.save(() => {
         req.session.isLoggedIn = true;
         req.session.user = user.getUser();
-        return res.json({ data: "successfully logged in" });
+        return res.json({ success: true });
       });
     } else {
-      return res.status(401).json({ error: "failed to login" });
+      return res.status(500).json({ success: false });
     }
   } catch (error) {
     console.log(`[ERROR]: Failed to login | ${error.message}`);
 
-    return res.status(500).json({ error: "Failed to login" });
+    return res.status(500).json({ success: false });
   }
 };
 
@@ -47,7 +47,7 @@ const signup = async (req, res) => {
         `[ERROR]: Failed to create user | Email address of ${email} already exists`
       );
 
-      return res.status(400).json({ error: "Failed to create user" });
+      return res.status(500).json({ success: false });
     }
 
     // create user
@@ -58,16 +58,22 @@ const signup = async (req, res) => {
       password,
     });
 
-    return res.json({ data: "successfully created user" });
+    return res.json({ success: true });
   } catch (error) {
     console.log(`[ERROR]: Failed to create user | ${error.message}`);
 
-    return res.status(500).json({ error: "Failed to create user" });
+    return res.status(500).json({ success: false });
   }
 };
 
 const logout = (req, res) => {
-  // if logged in destroy session
+  if (req.session.isLoggedIn) {
+    req.session.destroy(() => {
+      return res.status(204).end();
+    });
+  } else {
+    return res.status(404).end();
+  }
 };
 
 module.exports = {
