@@ -1,4 +1,5 @@
 const { Router } = require("express");
+
 const { renderDashboardPage } = require("../../controllers/views/privateViews");
 
 const router = Router();
